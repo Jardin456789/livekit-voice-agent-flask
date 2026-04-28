@@ -1,0 +1,16 @@
+{
+  "name": "appointment-agent-dispatch",
+  "trunk_ids": ["<inbound-trunk-id>"],
+  "rule": {
+    "dispatchRuleIndividual": {
+      "roomPrefix": "call-"
+    }
+  },
+  "room_config": {
+    "agents": [
+      {
+        "agent_name": "appointment-agent"
+      }
+    ]
+  }
+}
