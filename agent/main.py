@@ -17,6 +17,7 @@ from livekit.agents import (
     function_tool,
 )
 from livekit.plugins import noise_cancellation, openai, silero
+from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
 load_dotenv()
 
@@ -175,8 +176,12 @@ async def entrypoint(ctx: JobContext) -> None:
     session = AgentSession(
         stt=openai.STT(model="gpt-4o-transcribe", language="fr"),
         llm=openai.LLM(model="gpt-4.1"),
-        tts=openai.TTS(model="gpt-4o-mini-tts", voice="ash"),
+        # `coral` is a warm female voice — fits the "Léa" persona.
+        tts=openai.TTS(model="gpt-4o-mini-tts", voice="coral"),
         vad=silero.VAD.load(),
+        # End-of-utterance detector tuned for natural turn-taking; multilingual
+        # variant handles French. Silero VAD alone tends to cut speakers off.
+        turn_detection=MultilingualModel(),
     )
 
     await session.start(

@@ -4,31 +4,30 @@ import tempfile
 import pytest
 
 
-@pytest.fixture()
-def client():
-    # Use a fresh SQLite file per test session so we don't pollute the dev DB.
+@pytest.fixture(scope="session")
+def _flask_app():
     db_fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(db_fd)
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
 
-    # Force re-import so the engine picks up the env var.
-    import importlib
+    # Import after the env var is set so the engine binds to the temp file.
+    from api.app import app as flask_app
 
-    from api import database  # noqa: F401
-
-    importlib.reload(database)
-    from api import models  # noqa: F401
-
-    importlib.reload(models)
-    from api import app as app_module
-
-    importlib.reload(app_module)
-
-    app_module.app.config.update(TESTING=True)
-    with app_module.app.test_client() as c:
-        yield c
+    yield flask_app
 
     os.unlink(db_path)
+
+
+@pytest.fixture()
+def client(_flask_app):
+    # Wipe between tests so each one starts on an empty schema.
+    from api.database import Base, engine
+
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
+
+    with _flask_app.test_client() as c:
+        yield c
 
 
 def test_end_of_call_persists_payload(client):
