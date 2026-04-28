@@ -7,7 +7,12 @@ Vue d'ensemble du système couvrant le brief :
 
 L'idée directrice : pendant l'appel on reste sur le **chemin temps-réel** (LiveKit + LLM), tout ce qui n'a pas besoin d'être synchrone (booking, email, audit) part sur un **chemin asynchrone** déclenché par des événements. Ça isole la latence vocale du reste et permet de retry sans perturber l'appelant.
 
+> 📎 **Versions PNG** (utiles si vous lisez le repo hors GitHub) : [`architecture-system.png`](architecture-system.png) · [`architecture-sequence.png`](architecture-sequence.png).
+> Sur GitHub, les blocs Mermaid ci-dessous se rendent directement.
+
 ## 1. Vue système
+
+![Vue système](architecture-system.png)
 
 ```mermaid
 flowchart LR
@@ -65,6 +70,8 @@ flowchart LR
 ```
 
 ## 2. Chronologie d'un appel
+
+![Chronologie d'un appel](architecture-sequence.png)
 
 ```mermaid
 sequenceDiagram

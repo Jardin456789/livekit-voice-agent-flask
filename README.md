@@ -13,6 +13,13 @@ Agent vocal **téléphonique** qui répond aux appels entrants, demande à l'app
 | **1 — Code Flask + agent LiveKit** | API `POST /end-of-call` + agent vocal qui demande la date, raccroche, et appelle l'API | [`api/`](api/), [`agent/`](agent/), [`tests/`](tests/) |
 | **2 — Architecture** | Diagrammes système + séquence couvrant booking externe (async) et notification email (webhook LiveKit) | [`docs/architecture.md`](docs/architecture.md) |
 
+## Pour l'évaluateur
+
+- L'API Flask est testable localement sans compte LiveKit/Twilio : `pip install -r requirements-dev.txt && pytest -q`.
+- L'agent LiveKit est conçu pour fonctionner en playground LiveKit et en appel SIP, sous réserve de fournir les credentials LiveKit/OpenAI.
+- La partie architecture est volontairement séparée du MVP implémenté : elle décrit la cible prod sans alourdir le code du test.
+- Les limites assumées sont explicitées en fin de README : pas d'auth, pas de retry persistant, SQLite pour rester léger.
+
 ## Guide de lecture (≈ 5 min)
 
 1. **Ce README** — choix techniques, raisonnement, ce que j'ai reporté.
@@ -89,7 +96,7 @@ Ouvrir [agents-playground.livekit.io](https://agents-playground.livekit.io), se 
 
 ## 2. Mise en prod téléphonique (Twilio + LiveKit SIP)
 
-Le code agent est déjà prêt pour le SIP : il détecte le `participant.kind == SIP`, récupère le numéro via `sip.phoneNumber`, et raccroche en supprimant la room (ce qui envoie `SIP BYE` côté Twilio).
+Le code agent est conçu pour le SIP : il récupère le numéro via les attributs LiveKit (`sip.phoneNumber` / `sip.from`) et raccroche en supprimant la room, ce qui envoie `SIP BYE` côté trunk.
 
 ### a. Numéro et trunk Twilio
 
@@ -177,7 +184,7 @@ Healthcheck pour orchestration.
 ## 4. Tests
 
 ```bash
-pip install pytest
+pip install -r requirements-dev.txt
 pytest -q
 # → 3 passed
 ```
